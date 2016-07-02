@@ -18,7 +18,7 @@ function mailchimp_subscribe_menu()
         'access arguments' => array('administer mailchimp_subscribe'),
     );
 
-    $items['admin/config/mailchimp_subscribe/lists'] = array(
+    $items['admin/config/mailchimp_subscribe/main'] = array(
         'title' => t('Main settings'),
         'description' => t('Mailchimp main settings.'),
         'access callback' => 'user_access',
