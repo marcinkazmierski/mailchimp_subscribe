@@ -1,0 +1,75 @@
+<?php
+// mailchimp_subscribe
+
+require(dirname(__FILE__) . '/mailchimp/mailchimp.class.php');
+
+/**
+ * Implements hook_menu().
+ */
+function mailchimp_subscribe_menu()
+{
+    $items['admin/config/mailchimp_subscribe'] = array(
+        'title' => 'Mailchimp Settings',
+        'page callback' => 'system_admin_menu_block_page',
+        'position' => 'right',
+        'weight' => 0,
+        'file' => 'system.admin.inc',
+        'file path' => drupal_get_path('module', 'system'),
+        'access arguments' => array('administer mailchimp_subscribe'),
+    );
+
+    $items['admin/config/mailchimp_subscribe/lists'] = array(
+        'title' => 'Main',
+        'description' => 'Mailchimp main settings.',
+        'access callback' => 'user_access',
+        'access arguments' => array('administer mailchimp_subscribe'),
+        'file' => 'mailchimp_subscribe.admin.inc',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('_mailchimp_subscribe_lists_form'),
+        'file path' => drupal_get_path('module', 'mailchimp_subscribe'),
+    );
+
+    return $items;
+}
+
+function mailchimp_add($email, $name)
+{
+    $MailChimp = new \Drewm\MailChimp(variable_get('mailchimp_api_key', ''));
+    $list_id = variable_get('mailchimp_list_default', '');
+    $result = $MailChimp->call('lists/subscribe', array(
+        'id' => $list_id,
+        'email' => array('email' => htmlentities($email)),
+        'merge_vars' => array(
+            'NAME' => htmlentities($name),
+        ),
+        'double_optin' => FALSE,
+        'update_existing' => TRUE,
+        'replace_interests' => FALSE,
+        'send_welcome' => TRUE,
+    ));
+
+    if (!empty($result['leid'])) {
+        watchdog('mailchimp', 'mailchimp_add status[success] leid: %status.', array(
+            '%status' => $result['leid'],
+        ));
+        return true;
+    }
+    watchdog('mailchimp', 'mailchimp_add error for email: %email.', array(
+        '%email' => $email,
+    ));
+    return FALSE;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function mailchimp_subscribe_permission()
+{
+    return array(
+        'administer mailchimp_subscribe' => array(
+            'title' => t('Permissions for mailchimp settings'),
+            'description' => t('Permissions for mailchimp settings subscribe'),
+        ),
+    );
+}
