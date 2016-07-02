@@ -12,7 +12,6 @@ function _mailchimp_subscribe_lists_form($form, &$form_state)
         '#title' => t('API KEY'),
         '#default_value' => variable_get('mailchimp_api_key'),
     );
-
     $form['mailchimp']['mailchimp_list_default'] = array(
         '#type' => 'textfield',
         '#title' => t('List ID:'),
